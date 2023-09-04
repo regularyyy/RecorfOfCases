@@ -1,0 +1,61 @@
+import tkinter as tk
+from tkinter import messagebox, filedialog
+
+class CaseRecordApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Case Record App")
+
+        self.case_list = []
+
+        self.case_id_label = tk.Label(root, text="Case name:")
+        self.case_id_label.pack()
+        self.case_id_entry = tk.Entry(root)
+        self.case_id_entry.pack()
+
+        self.description_label = tk.Label(root, text="Description:")
+        self.description_label.pack()
+        self.description_entry = tk.Entry(root)
+        self.description_entry.pack()
+
+        self.record_button = tk.Button(root, text="Show Case", command=self.record_case)
+        self.record_button.pack()
+
+        self.case_listbox = tk.Listbox(root)
+        self.case_listbox.pack()
+
+        self.last_case_label = tk.Label(root, text="Last Added Case:")
+        self.last_case_label.pack()
+
+        self.last_case_info = tk.Label(root, text="")
+        self.last_case_info.pack()
+
+        self.save_case = tk.Button(root, text="Save Case", command=self.save_case)
+        self.save_case.pack()
+
+    def save_case(self):
+        self.file_path = filedialog.asksaveasfilename(defaultextension='.csv')
+        if self.file_path:
+            with open(self.file_path, 'w') as file:
+                for item in self.case_list:
+                    file.write(item + '\n')
+
+    def record_case(self):
+        case_id = self.case_id_entry.get()
+        description = self.description_entry.get()
+
+        if case_id and description:
+            case_info = f"Case name: {case_id}\nDescription: {description}\n"
+            self.case_listbox.insert(tk.END, case_info)
+            self.case_list.append(case_info)
+
+            self.last_case_info.config(text=case_info)
+        else:
+            messagebox.showerror("Error", "All fields must be filled!")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    root.geometry('400x400')
+
+    app = CaseRecordApp(root)
+    root.mainloop()
