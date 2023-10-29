@@ -1,10 +1,13 @@
 import tkinter as tk
-from tkinter import messagebox, filedialog
+from tkinter import messagebox
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
-class CaseRecordApp:
+class CaseRecordApp():
     def __init__(self, root):
         self.root = root
-        self.root.title("Case Record App")
+        self.root.geometry('400x400')
+        self.root.title("CaseRecordAPP")
 
         self.case_list = []
 
@@ -33,13 +36,6 @@ class CaseRecordApp:
         self.save_case = tk.Button(root, text="Save Case", command=self.save_case)
         self.save_case.pack()
 
-    def save_case(self):
-        self.file_path = filedialog.asksaveasfilename(defaultextension='.csv')
-        if self.file_path:
-            with open(self.file_path, 'w') as file:
-                for item in self.case_list:
-                    file.write(item + '\n')
-
     def record_case(self):
         case_id = self.case_id_entry.get()
         description = self.description_entry.get()
@@ -53,9 +49,23 @@ class CaseRecordApp:
         else:
             messagebox.showerror("Error", "All fields must be filled!")
 
+    def save_case(self):
+        scope = ['https://www.googleapis.com/auth/spreadsheets']
+
+        credentials = ServiceAccountCredentials.from_json_keyfile_name('C:/Git/credentials.json', scope)
+        gc = gspread.authorize(credentials)
+
+        worksheet = gc.open_by_url('https://docs.google.com/spreadsheets/d/1RNwavTa5CPiYWJDhKeQP8FhvbT6uBnaqXMlMfPjYJ-s/edit#gid=0').sheet1
+
+        worksheet.update_acell('A1', 'Case name')
+
+        cell_list = worksheet.range('A2:B2')
+        cell_list[0].value = self.case_id_entry.get()
+        cell_list[1].value = self.description_entry.get()
+        worksheet.update_cells(cell_list)
+
 if __name__ == "__main__":
     root = tk.Tk()
-    root.geometry('400x400')
-
     app = CaseRecordApp(root)
+
     root.mainloop()
